@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no">
+    <title>Stream Invertebrate Distribution</title>
+  </head>
+  
+  <body>
+    <link rel="stylesheet" href="https://js.arcgis.com/3.8/js/esri/css/esri.css">
+
+    <style>
+      #info {
+        top: 20px;
+        color: #444;
+        height: auto;
+        font-family: arial;
+        right: 20px;
+        margin: 5px;
+        padding: 10px;
+        position: absolute;
+        width: 115px;
+        z-index: 40;
+        border: solid 2px #666;
+        border-radius: 4px;
+        background-color: #fff;
+      }
+      html, body, #mapDiv {
+        padding:0;
+        margin:0;
+        height:100%;
+      }
+      button {
+        display: block;
+      }
+    </style>
+
+  <script src="https://js.arcgis.com/3.8/"></script>
+  <script>
+	var map, tb, data;
+	
+	// define the function and assign the data to a var
+	function inverts9(obj) { data = obj };
+
+	// build the map
+      require([
+        "esri/map", 
+        "esri/symbols/SimpleMarkerSymbol",  
+        "esri/layers/GraphicsLayer", "esri/graphic", "esri/geometry/Point", "esri/InfoTemplate", 
+		"dojo/domReady!"
+      ], function(
+		Map,
+        SimpleMarkerSymbol,
+        GraphicsLayer, Graphic, Point, InfoTemplate
+      ) {
+		// map params
+        map = new Map("mapDiv", {
+          basemap: "streets",
+		  center: [-92.0,44],
+          zoom: 9,
+		  minZoom: 7
+        });
+		
+		// Create a graphics layer for point graphics		
+		var pointLayer = new GraphicsLayer(); 
+		
+		for (var i=0; i < data.features.length; i++) {
+		
+			var bug = "Glossosoma", sum = 0
+			if (data.features[i].attributes.Name1 == bug) {
+				sum = sum + data.features[i].attributes.MIBI.toFixed(0)
+			};
+			
+			if (data.features[i].attributes.Name1 == bug) {
+			
+				var x = data.features[i].attributes.LON8xDD;
+				var y = data.features[i].attributes.LAT8xDD;
+				var color = new dojo.Color([255,128,0,0.8])
+				//var size = 8
+				// use the IBI score (1 - 100) to set the marker size 
+				var size = ((data.features[i].attributes.MIBI * 4) / 10) - 8 
+
+				// create the point graphic and attributes
+				var pt = new Point(x, y);
+				var sms = new SimpleMarkerSymbol().setStyle(SimpleMarkerSymbol.STYLE_CIRCLE).setSize(size).setColor(color);
+				var attr = {
+					"SiteID":data.features[i].attributes.FieldNum, 
+					 "Name1":data.features[i].attributes.Name1,
+					 "Name2":data.features[i].attributes.Name2,
+					   "IBI":data.features[i].attributes.MIBI.toFixed(0),
+					 "Count":data.features[i].attributes.Count
+				}; 
+				var infoTemplate = new InfoTemplate("${Name1} ${Name2}","IBI: ${IBI}<br/><br/>Count: ${Count}"); 
+				var graphic = new Graphic(pt,sms,attr,infoTemplate);
+				// add the new point graphic to the graphics layer
+				pointLayer.add(graphic);
+			};
+		};
+		// add the graphics layer to the map
+		map.addLayer(pointLayer);
+    });	  
+	  
+    </script>
+    <script src="http://jasonewert.github.io/simpleFileEsriJSapi/simpleFileEsriJSapi/files/inverts_2013_class9.js" type="text/javascript"></script>
+	<!--
+	<h1>Glossosoma Distribution <img src="http://english-fly-fishing-flies.s3-website-eu-west-1.amazonaws.com/dark-wing-elk-hair-caddis-fishing-fly.jpg"></img> </h1>
+	-->
+	<div id="mapDiv" class="claro" style="width:600px; height:400px; border:1px solid #000;">
+	</div>
+
+	<div style="width:600px;">
+		<br />
+		<p><strong><i>“The angler forgets most of the fish he catches, but he does not forget the streams and lakes in which they are caught.” – Charles K. Fox</i></strong></p>
+		<br />
+	</div>
+
+  </body>
+</html>
